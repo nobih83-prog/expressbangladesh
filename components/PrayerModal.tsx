@@ -1,6 +1,6 @@
 
-import React, { useState, useMemo } from 'react';
-import { X, MapPin, Clock, Search } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { X, MapPin, Clock, Search, Activity } from 'lucide-react';
 import { translations } from '../translations';
 import { DISTRICTS, District } from '../constants/districts';
 
@@ -13,10 +13,15 @@ interface PrayerModalProps {
 const PrayerModal: React.FC<PrayerModalProps> = ({ isOpen, onClose, language }) => {
   const [selectedDistrictId, setSelectedDistrictId] = useState('dhaka');
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentTime, setCurrentTime] = useState(new Date());
   
-  if (!isOpen) return null;
-
   const t = translations[language];
+
+  // Update clock every second
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const selectedDistrict = useMemo(() => 
     DISTRICTS.find(d => d.id === selectedDistrictId) || DISTRICTS[0],
@@ -30,6 +35,26 @@ const PrayerModal: React.FC<PrayerModalProps> = ({ isOpen, onClose, language }) 
       d.bn.includes(searchTerm)
     );
   }, [searchTerm]);
+
+  const formatDigits = (str: string) => {
+    if (language === 'bn') {
+      const bnDigits: { [key: string]: string } = {
+        '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯'
+      };
+      return str.replace(/[0-9]/g, w => bnDigits[w]);
+    }
+    return str;
+  };
+
+  const liveTimeStr = useMemo(() => {
+    let h = currentTime.getHours();
+    const m = currentTime.getMinutes();
+    const s = currentTime.getSeconds();
+    const modifier = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    const time = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')} ${modifier}`;
+    return formatDigits(time);
+  }, [currentTime, language]);
 
   // Helper function to add minutes to a base time string "HH:MM AM/PM"
   const addMinutes = (timeStr: string, minutes: number) => {
@@ -48,23 +73,15 @@ const PrayerModal: React.FC<PrayerModalProps> = ({ isOpen, onClose, language }) 
     const newModifier = h >= 12 ? 'PM' : 'AM';
 
     h = h % 12;
-    h = h ? h : 12; // the hour '0' should be '12'
+    h = h ? h : 12; 
     
     const formattedH = h.toString().padStart(2, '0');
     const formattedM = m.toString().padStart(2, '0');
 
-    // Convert digits if language is Bengali
-    const result = `${formattedH}:${formattedM} ${newModifier}`;
-    if (language === 'bn') {
-      const bnDigits: { [key: string]: string } = {
-        '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯'
-      };
-      return result.replace(/[0-9]/g, w => bnDigits[w]);
-    }
-    return result;
+    return formatDigits(`${formattedH}:${formattedM} ${newModifier}`);
   };
 
-  const schedule = [
+  const schedule = useMemo(() => [
     { name: t.fajr, time: addMinutes('05:15 AM', selectedDistrict.offset) },
     { name: t.sunrise, time: addMinutes('06:38 AM', selectedDistrict.offset) },
     { name: t.dhuhr, time: addMinutes('12:15 PM', selectedDistrict.offset) },
@@ -73,7 +90,9 @@ const PrayerModal: React.FC<PrayerModalProps> = ({ isOpen, onClose, language }) 
     { name: t.isha, time: addMinutes('07:10 PM', selectedDistrict.offset) },
     { name: t.sehri, time: addMinutes('05:10 AM', selectedDistrict.offset), highlight: true },
     { name: t.iftar, time: addMinutes('05:52 PM', selectedDistrict.offset), highlight: true },
-  ];
+  ], [t, selectedDistrict, language]);
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
@@ -97,6 +116,17 @@ const PrayerModal: React.FC<PrayerModalProps> = ({ isOpen, onClose, language }) 
           </div>
           <h2 className="text-2xl font-black mb-1">{t.prayerSchedule}</h2>
           
+          {/* Live Clock Ticker */}
+          <div className="mt-4 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.8)]" />
+              <span className="text-sm font-bold text-gray-300">{language === 'bn' ? 'বর্তমান সময়:' : 'Current Time:'}</span>
+            </div>
+            <div className="text-2xl font-black text-yellow-500 font-en tabular-nums">
+              {liveTimeStr}
+            </div>
+          </div>
+
           <div className="mt-4 relative">
              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                 <Search className="w-4 h-4 text-gray-400" />

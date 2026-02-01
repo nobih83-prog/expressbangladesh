@@ -1,9 +1,9 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MOCK_NEWS, CATEGORIES } from '../constants';
 import NewsCard from '../components/NewsCard';
-import { ChevronRight, Calendar, Youtube, PlayCircle, ExternalLink } from 'lucide-react';
+import { ChevronRight, Calendar, Youtube, PlayCircle, ExternalLink, Clock } from 'lucide-react';
 import { translations } from '../translations';
 
 interface HomeProps {
@@ -13,7 +13,14 @@ interface HomeProps {
 
 const Home: React.FC<HomeProps> = ({ language, onOpenPrayer }) => {
   const { id } = useParams<{ id?: string }>();
+  const [currentTime, setCurrentTime] = useState(new Date());
   const t = translations[language];
+
+  // Update clock every second for the live time feature
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const currentCategory = useMemo(() => {
     if (!id || id === 'latest') return null;
@@ -32,13 +39,34 @@ const Home: React.FC<HomeProps> = ({ language, onOpenPrayer }) => {
     ? (language === 'bn' ? currentCategory.label : currentCategory.labelEn)
     : (language === 'bn' ? 'সর্বশেষ খবর' : 'Latest News');
 
+  const formatDigits = (str: string) => {
+    if (language === 'bn') {
+      const bnDigits: { [key: string]: string } = {
+        '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯'
+      };
+      return str.replace(/[0-9]/g, w => bnDigits[w]);
+    }
+    return str;
+  };
+
+  const liveTimeStr = useMemo(() => {
+    let h = currentTime.getHours();
+    const m = currentTime.getMinutes();
+    const s = currentTime.getSeconds();
+    const modifier = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    const time = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')} ${modifier}`;
+    return formatDigits(time);
+  }, [currentTime, language]);
+
   return (
     <div className="container mx-auto px-4 py-6 transition-colors">
       <div className="flex flex-col lg:flex-row gap-8">
         
+        {/* Main Content Area */}
         <div className="lg:w-2/3">
           {filteredNews.length > 0 ? (
-            <div className="mb-8 rounded-xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-800 transition-colors">
+            <div className="mb-6 sm:mb-8 rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-800 transition-colors">
               <NewsCard news={featured} layout="hero" />
             </div>
           ) : (
@@ -50,9 +78,9 @@ const Home: React.FC<HomeProps> = ({ language, onOpenPrayer }) => {
           )}
 
           <div className="flex items-center justify-between mb-4 border-l-4 border-red-600 pl-3">
-            <h2 className="text-2xl font-black flex items-center dark:text-white transition-colors">
+            <h2 className="text-xl sm:text-2xl font-black flex items-center dark:text-white transition-colors">
               {pageTitle}
-              <span className="ml-3 text-sm text-gray-400 dark:text-gray-500 font-normal hidden sm:flex items-center">
+              <span className="ml-3 text-[10px] sm:text-sm text-gray-400 dark:text-gray-500 font-normal hidden xs:flex items-center">
                 <Calendar className="w-4 h-4 mr-1"/> {language === 'bn' ? '০২ ফেব্রুয়ারি ২০২৫' : 'February 02, 2025'}
               </span>
             </h2>
@@ -72,7 +100,7 @@ const Home: React.FC<HomeProps> = ({ language, onOpenPrayer }) => {
 
           {filteredNews.length > 0 && (
             <div className="mt-8 flex justify-center">
-              <button className="flex items-center space-x-2 bg-white dark:bg-gray-800 border border-yellow-500 text-yellow-600 dark:text-yellow-500 px-6 py-2 rounded-full font-bold hover:bg-yellow-500 hover:text-white dark:hover:text-black transition shadow-sm">
+              <button className="flex items-center space-x-2 bg-white dark:bg-gray-800 border border-yellow-500 text-yellow-600 dark:text-yellow-500 px-6 py-2.5 rounded-full font-bold hover:bg-yellow-500 hover:text-white dark:hover:text-black transition shadow-sm active:scale-95">
                 <span>{t.readMore}</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -80,25 +108,54 @@ const Home: React.FC<HomeProps> = ({ language, onOpenPrayer }) => {
           )}
         </div>
 
+        {/* Sidebar Area */}
         <div className="lg:w-1/3 space-y-8">
-          <div className="bg-yellow-50 dark:bg-gray-800/50 rounded-lg p-6 text-center border border-yellow-200 dark:border-yellow-900/50 transition-colors">
-            <img src="https://picsum.photos/seed/ad-side/300/250" alt="Sidebar Ad" className="mx-auto rounded shadow-sm opacity-90 dark:opacity-70" />
-            <p className="mt-2 text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">
-               {t.advertisement}
-            </p>
+          
+          {/* Prayer Schedule Card with Live Clock */}
+          <div className="bg-gradient-to-br from-gray-800 to-black rounded-2xl p-6 text-white text-center shadow-xl transform hover:scale-[1.01] transition-all border-t-4 border-yellow-500">
+             <div className="flex justify-center mb-3">
+               <div className="relative">
+                  <Clock className="w-12 h-12 text-yellow-500" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.8)]" />
+                  </div>
+               </div>
+             </div>
+             <h4 className="text-lg font-black mb-1 uppercase tracking-tight">
+                {t.prayerSchedule}
+             </h4>
+             
+             {/* Dynamic Live Time Display */}
+             <div className="my-4 inline-block bg-white/10 px-6 py-3 rounded-2xl border border-white/10 backdrop-blur-md shadow-inner">
+                <span className="text-3xl font-black text-yellow-400 font-en tracking-tighter tabular-nums">
+                  {liveTimeStr}
+                </span>
+             </div>
+
+             <p className="text-xs text-gray-400 mb-4 font-medium">
+                {language === 'bn' ? 'আপনার এলাকার সঠিক সময় জানতে ক্লিক করুন' : 'Click to know exact time of your area'}
+             </p>
+             <button 
+               onClick={onOpenPrayer}
+               className="w-full bg-yellow-500 text-black px-6 py-3 rounded-xl text-sm font-black hover:bg-yellow-600 transition shadow-lg active:scale-95 uppercase tracking-widest"
+             >
+                {t.prayerCTA}
+             </button>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
-            <h3 className="text-xl font-bold mb-4 border-b-2 border-yellow-500 pb-1 dark:text-white">
+          {/* Popular News Section */}
+          <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
+            <h3 className="text-xl font-black mb-5 border-b-2 border-yellow-500 pb-1 dark:text-white flex items-center">
+               <span className="w-2 h-6 bg-yellow-500 mr-2 rounded-full"></span>
                {t.popular}
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-5">
               {MOCK_NEWS.slice(0, 5).map((news, idx) => (
                 <Link to={`/news/${news.id}`} key={`popular-${news.id}`} className="flex space-x-3 items-start group cursor-pointer">
-                  <span className="text-2xl font-black text-gray-200 dark:text-gray-700 group-hover:text-yellow-500 dark:group-hover:text-yellow-500 transition leading-none font-en">
-                    {idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
+                  <span className="text-2xl font-black text-gray-200 dark:text-gray-700 group-hover:text-yellow-500 transition leading-none font-en pt-1">
+                    {idx + 1}
                   </span>
-                  <p className="text-sm font-bold leading-snug text-gray-800 dark:text-gray-300 group-hover:text-yellow-600 dark:group-hover:text-yellow-500 transition-colors">
+                  <p className="text-sm font-bold leading-snug text-gray-800 dark:text-gray-300 group-hover:text-yellow-600 dark:group-hover:text-yellow-500 transition-colors line-clamp-2">
                     {news.title}
                   </p>
                 </Link>
@@ -106,32 +163,20 @@ const Home: React.FC<HomeProps> = ({ language, onOpenPrayer }) => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-800 to-black rounded-xl p-6 text-white text-center shadow-lg transform hover:scale-[1.02] transition">
-             <div className="flex justify-center mb-3">
-               <svg className="w-12 h-12 text-yellow-500 fill-current" viewBox="0 0 24 24">
-                 <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z" />
-               </svg>
-             </div>
-             <h4 className="text-lg font-bold mb-1">
-                {t.prayerSchedule}
-             </h4>
-             <p className="text-xs text-gray-400 mb-3">
-                {language === 'bn' ? 'আপনার এলাকার সঠিক সময় জানতে' : 'To know the exact time of your area'}
-             </p>
-             <button 
-               onClick={onOpenPrayer}
-               className="bg-yellow-500 text-black px-6 py-2 rounded-full text-sm font-bold hover:bg-yellow-600 transition shadow-lg active:scale-90"
-             >
-                {t.prayerCTA}
-             </button>
+          {/* Advertisement Placeholder */}
+          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4 text-center border border-gray-100 dark:border-gray-700 transition-colors">
+            <img src="https://picsum.photos/seed/ad-side/300/250" alt="Sidebar Ad" className="mx-auto rounded-xl shadow-sm opacity-90 hover:opacity-100 transition" />
+            <p className="mt-3 text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.2em]">
+               {t.advertisement}
+            </p>
           </div>
 
-          {/* YouTube Section */}
-          <div className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 transition-colors">
+          {/* YouTube Live Section */}
+          <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 transition-colors">
             <div className="flex items-center justify-between mb-4 border-b-2 border-red-600 pb-2">
               <div className="flex items-center space-x-2">
                 <Youtube className="w-6 h-6 text-red-600" />
-                <h3 className="text-xl font-bold dark:text-white uppercase tracking-tight">
+                <h3 className="text-lg font-black dark:text-white uppercase tracking-tighter">
                    {t.youtube}
                 </h3>
               </div>
@@ -139,13 +184,13 @@ const Home: React.FC<HomeProps> = ({ language, onOpenPrayer }) => {
                 href="https://www.youtube.com/@Channel24Ghontav" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-red-600 transition"
+                className="text-gray-400 hover:text-red-600 transition p-1"
               >
                 <ExternalLink className="w-4 h-4" />
               </a>
             </div>
             
-            <div className="aspect-video w-full rounded-lg overflow-hidden bg-black shadow-inner mb-4">
+            <div className="aspect-video w-full rounded-xl overflow-hidden bg-black shadow-inner mb-4 border border-gray-200 dark:border-gray-700">
               <iframe 
                 width="100%" 
                 height="100%" 
@@ -154,16 +199,15 @@ const Home: React.FC<HomeProps> = ({ language, onOpenPrayer }) => {
                 frameBorder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                 allowFullScreen
-                referrerPolicy="strict-origin-when-cross-origin"
                 className="opacity-95 hover:opacity-100 transition-opacity"
               ></iframe>
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-start space-x-3 group cursor-pointer border-b border-gray-100 dark:border-gray-700 pb-3">
+              <div className="flex items-start space-x-3 group cursor-pointer border-b border-gray-50 dark:border-gray-700 pb-3">
                 <div className="relative shrink-0">
-                  <img src="https://img.youtube.com/vi/hazRrHlHI8I/0.jpg" className="w-24 h-14 object-cover rounded shadow-sm" alt="Video thumbnail" />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/0 transition">
+                  <img src="https://img.youtube.com/vi/hazRrHlHI8I/0.jpg" className="w-20 sm:w-24 h-12 sm:h-14 object-cover rounded-lg shadow-sm" alt="Video thumbnail" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/0 transition rounded-lg">
                     <PlayCircle className="w-6 h-6 text-white/90" />
                   </div>
                 </div>
@@ -171,22 +215,7 @@ const Home: React.FC<HomeProps> = ({ language, onOpenPrayer }) => {
                   <p className="text-xs font-bold leading-tight dark:text-gray-300 group-hover:text-red-600 transition line-clamp-2">
                     {language === 'bn' ? 'এক্সপ্রেস বাংলাদেশ: আমাদের বিশেষ ইউটিউব প্রতিবেদন' : 'Express Bangladesh: Our special YouTube report'}
                   </p>
-                  <span className="text-[10px] text-gray-400 mt-1 block">Just now</span>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-3 group cursor-pointer">
-                <div className="relative shrink-0">
-                  <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg" className="w-24 h-14 object-cover rounded shadow-sm" alt="Video thumbnail" />
-                   <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/0 transition">
-                    <PlayCircle className="w-6 h-6 text-white/90" />
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs font-bold leading-tight dark:text-gray-300 group-hover:text-red-600 transition line-clamp-2">
-                    {language === 'bn' ? 'চ্যানেল ২৪: খবরের পিছনের সব খবর সরাসরি' : 'Channel 24: All news behind news live'}
-                  </p>
-                  <span className="text-[10px] text-gray-400 mt-1 block">3 hours ago</span>
+                  <span className="text-[9px] text-gray-400 mt-1 block font-bold uppercase tracking-widest">Live</span>
                 </div>
               </div>
             </div>
@@ -195,14 +224,14 @@ const Home: React.FC<HomeProps> = ({ language, onOpenPrayer }) => {
               href="https://www.youtube.com/@Channel24Ghontav" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="mt-6 flex items-center justify-center space-x-2 bg-red-600 text-white py-3 rounded-xl font-bold hover:bg-red-700 transition active:scale-95 text-sm shadow-lg shadow-red-600/20"
+              className="mt-6 flex items-center justify-center space-x-2 bg-red-600 text-white py-3.5 rounded-xl font-black hover:bg-red-700 transition active:scale-95 text-xs uppercase tracking-widest shadow-lg shadow-red-600/20"
             >
-              <Youtube className="w-5 h-5" />
+              <Youtube className="w-4 h-4" />
               <span>{language === 'bn' ? 'সাবস্ক্রাইব করুন' : 'Subscribe Now'}</span>
             </a>
           </div>
-        </div>
 
+        </div>
       </div>
     </div>
   );
