@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Sidebar from './components/Sidebar';
@@ -12,6 +12,17 @@ import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import PrayerModal from './components/PrayerModal';
+
+// Component to handle scroll restoration on route change
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
 
 const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -47,6 +58,7 @@ const App: React.FC = () => {
 
   return (
     <Router>
+      <ScrollToTop />
       <div className={`flex flex-col min-h-screen transition-colors duration-500 ${isDarkMode ? 'dark bg-gray-900' : 'bg-[#F8F9FA]'} ${language === 'en' ? 'font-en' : 'font-bn'}`}>
         <Header 
           onMenuToggle={() => setIsSidebarOpen(true)} 
