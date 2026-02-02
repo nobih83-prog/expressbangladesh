@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { X, ChevronRight, Facebook, Instagram, Twitter, Youtube, Linkedin } from 'lucide-react';
+import { X, ChevronRight, Facebook, Instagram, Twitter, Youtube, Linkedin, Calendar as CalendarIcon } from 'lucide-react';
 import { CATEGORIES } from '../constants';
 import { Link } from 'react-router-dom';
+import { translations } from '../translations';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -11,6 +12,8 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, language }) => {
+  const t = translations[language];
+
   return (
     <>
       <div 
@@ -20,13 +23,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, language }) => {
       
       <div className={`fixed top-0 right-0 h-full w-[300px] md:w-[400px] bg-white dark:bg-gray-900 z-[101] transition-transform duration-300 ease-out transform ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto`}>
         <div className="p-4 flex items-center justify-between border-b dark:border-gray-800 bg-yellow-50 dark:bg-gray-800 transition-colors">
-          <h2 className="text-xl font-bold dark:text-white">{language === 'bn' ? 'মেনু' : 'Menu'}</h2>
+          <h2 className="text-xl font-bold dark:text-white">{t.menu}</h2>
           <button onClick={onClose} className="p-1 hover:bg-yellow-200 dark:hover:bg-gray-700 rounded-full transition text-gray-600 dark:text-gray-300">
             <X className="w-6 h-6" />
           </button>
         </div>
 
         <div className="p-4 pb-20">
+          <div className="mb-8">
+            <Link 
+              to="/calendar-2026" 
+              onClick={onClose}
+              className="flex items-center space-x-3 p-4 bg-yellow-500 text-black rounded-2xl font-black hover:bg-yellow-600 transition shadow-lg"
+            >
+              <CalendarIcon className="w-6 h-6" />
+              <span>{t.calendar2026}</span>
+            </Link>
+          </div>
+
           {CATEGORIES.map((cat) => (
             <div key={cat.id} className="mb-6">
               <Link 
@@ -56,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, language }) => {
           ))}
 
           <div className="mt-8 border-t dark:border-gray-800 pt-6">
-            <p className="text-center font-bold mb-4 dark:text-gray-300">{language === 'bn' ? 'অনুসরণ করুন' : 'Follow Us'}</p>
+            <p className="text-center font-bold mb-4 dark:text-gray-300">{t.followUs}</p>
             <div className="flex justify-center space-x-4">
               <Facebook className="w-5 h-5 text-blue-600 cursor-pointer hover:scale-110 transition" />
               <Instagram className="w-5 h-5 text-pink-600 cursor-pointer hover:scale-110 transition" />

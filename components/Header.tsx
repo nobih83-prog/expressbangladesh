@@ -54,7 +54,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, isDarkMode, toggleDarkMod
         </Link>
 
         <div className="flex items-center space-x-1 sm:space-x-4 text-gray-600 dark:text-gray-300">
-          <Link to="/archive" title={language === 'bn' ? "আর্কাইভ" : "Archive"} className={`p-2 hidden xs:block ${isActive('/archive') ? 'text-yellow-500' : 'hover:text-yellow-500 transition-colors'}`}>
+          <Link to="/calendar-2026" title={language === 'bn' ? "২০২৬ ক্যালেন্ডার" : "2026 Calendar"} className={`p-2 hidden xs:block ${isActive('/calendar-2026') ? 'text-yellow-500' : 'hover:text-yellow-500 transition-colors'}`}>
             <Calendar className="w-5 h-5 cursor-pointer" />
           </Link>
           <button onClick={() => setIsSearchOpen(!isSearchOpen)} className="p-2 hover:text-yellow-500 transition-colors focus:outline-none">

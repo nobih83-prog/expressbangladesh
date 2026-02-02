@@ -1,10 +1,10 @@
 
+// Fixed: Added React import to resolve the 'Cannot find namespace React' error when using React.FC
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MOCK_NEWS } from '../constants';
 import { NewsItem } from '../types';
 import { Clock, User, Share2, Facebook, Twitter, MessageCircle, Sparkles } from 'lucide-react';
-import { getNewsSummary } from '../services/gemini';
 import { translations } from '../translations';
 import { GoogleGenAI } from "@google/genai";
 
@@ -22,6 +22,7 @@ const NewsDetail: React.FC<NewsDetailProps> = ({ language }) => {
   useEffect(() => {
     const fetchSummary = async () => {
       setLoadingSummary(true);
+      // Fixed: Initialize GoogleGenAI with named parameter apiKey from process.env.API_KEY
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       try {
         const response = await ai.models.generateContent({
@@ -31,6 +32,7 @@ const NewsDetail: React.FC<NewsDetailProps> = ({ language }) => {
             systemInstruction: `You are a professional journalist. Provide a concise summary in ${language === 'bn' ? 'Bengali' : 'English'}.`
           }
         });
+        // Fixed: Use .text property directly (not as a method) as per @google/genai guidelines
         setSummary(response.text || "No summary available.");
       } catch (error) {
         console.error("Gemini Error:", error);
@@ -96,12 +98,20 @@ const NewsDetail: React.FC<NewsDetailProps> = ({ language }) => {
         </div>
 
         <div className="prose prose-lg dark:prose-invert max-w-none text-gray-800 dark:text-gray-300 leading-relaxed space-y-6 text-lg">
-          <p>{news.excerpt}</p>
-          <p>
-            {language === 'bn' 
-              ? 'ঢাকা সংবাদদাতা: দেশের বর্তমান প্রেক্ষাপটে এই বিষয়টি অত্যন্ত গুরুত্ববহ। সংশ্লিষ্ট মহল থেকে জানানো হয়েছে যে, পরিস্থিতির ওপর নিবিড় পর্যবেক্ষণ রাখা হচ্ছে।'
-              : 'Dhaka Correspondent: In the current context of the country, this issue is very significant. Relevant authorities have informed that the situation is being closely monitored.'}
-          </p>
+          {news.content ? (
+            <div className="whitespace-pre-line">
+              {news.content}
+            </div>
+          ) : (
+            <>
+              <p>{news.excerpt}</p>
+              <p>
+                {language === 'bn' 
+                  ? 'ঢাকা সংবাদদাতা: দেশের বর্তমান প্রেক্ষাপটে এই বিষয়টি অত্যন্ত গুরুত্ববহ। সংশ্লিষ্ট মহল থেকে জানানো হয়েছে যে, পরিস্থিতির ওপর নিবিড় পর্যবেক্ষণ রাখা হচ্ছে।'
+                  : 'Dhaka Correspondent: In the current context of the country, this issue is very significant. Relevant authorities have informed that the situation is being closely monitored.'}
+              </p>
+            </>
+          )}
         </div>
 
         <div className="mt-16 border-t dark:border-gray-800 pt-8">
@@ -110,7 +120,7 @@ const NewsDetail: React.FC<NewsDetailProps> = ({ language }) => {
              {t.relatedNews}
            </h3>
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             {MOCK_NEWS.slice(1, 3).map(n => (
+             {MOCK_NEWS.filter(n => n.id !== news.id).slice(0, 2).map(n => (
                <Link to={`/news/${n.id}`} key={`related-${n.id}`} className="flex space-x-4 group">
                  <img src={n.imageUrl} className="w-24 h-24 object-cover rounded-lg flex-shrink-0 group-hover:opacity-80 transition shadow-sm" alt={n.title} />
                  <h4 className="font-bold leading-tight group-hover:text-yellow-600 transition dark:text-gray-300">{n.title}</h4>

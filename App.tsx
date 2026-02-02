@@ -11,6 +11,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
+import Calendar2026 from './pages/Calendar2026';
 import PrayerModal from './components/PrayerModal';
 
 // Component to handle scroll restoration on route change
@@ -82,6 +83,7 @@ const App: React.FC = () => {
             <Route path="/contact" element={<Contact language={language} />} />
             <Route path="/privacy" element={<Privacy language={language} />} />
             <Route path="/terms" element={<Terms language={language} />} />
+            <Route path="/calendar-2026" element={<Calendar2026 language={language} />} />
             <Route path="/news/:id" element={<NewsDetail language={language} />} />
             <Route path="/category/:id" element={<Home language={language} onOpenPrayer={() => setIsPrayerModalOpen(true)} />} />
             <Route path="*" element={<Home language={language} onOpenPrayer={() => setIsPrayerModalOpen(true)} />} />

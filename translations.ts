@@ -42,7 +42,15 @@ export const translations = {
     videoGallery: "ভিডিও গ্যালারি",
     editorName: "নবী হোসেন গাজী",
     address: "ইসিবি, ঢাকা সেনানিবাস, ঢাকা-১২১৩",
-    mobile: "০১৭১৮৯৫২৮৫২"
+    mobile: "০১৭১৮৯৫২৮৫২",
+    calendar: "ক্যালেন্ডার",
+    calendar2026: "২০২৬ ক্যালেন্ডার",
+    months: ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"],
+    weekdays: ["র", "সো", "ম", "বু", "বৃ", "শু", "শ"],
+    eventsForDay: "দিনের ইভেন্ট ও ছুটি",
+    noEvents: "এই দিনে কোনো বিশেষ ইভেন্ট বা সরকারি ছুটি নেই।",
+    holiday: "সরকারি ছুটি",
+    event: "ইভেন্ট"
   },
   en: {
     siteTitle: "Express Bangladesh",
@@ -86,6 +94,14 @@ export const translations = {
     videoGallery: "Video Gallery",
     editorName: "Nobi Hosen Gazi",
     address: "ECB, Dhaka Cantonment, Dhaka-1213",
-    mobile: "01718952852"
+    mobile: "01718952852",
+    calendar: "Calendar",
+    calendar2026: "2026 Calendar",
+    months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    weekdays: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+    eventsForDay: "Events & Holidays",
+    noEvents: "No special events or holidays on this day.",
+    holiday: "Public Holiday",
+    event: "Event"
   }
 };
