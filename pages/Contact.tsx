@@ -3,12 +3,15 @@ import React from 'react';
 import { translations } from '../translations';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SiteConfig } from '../types';
 
 interface ContactProps {
   language: 'bn' | 'en';
+  config: SiteConfig;
 }
 
-const Contact: React.FC<ContactProps> = ({ language }) => {
+// Contact component now accepts config for dynamic address and mobile number
+const Contact: React.FC<ContactProps> = ({ language, config }) => {
   const t = translations[language];
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl min-h-[60vh]">
@@ -29,8 +32,9 @@ const Contact: React.FC<ContactProps> = ({ language }) => {
                 <MapPin className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-bold text-xl">{t.address}</h3>
-                <p className="text-gray-600 dark:text-gray-400">{t.address}</p>
+                <h3 className="font-bold text-xl">{language === 'bn' ? 'ঠিকানা' : 'Address'}</h3>
+                {/* Use dynamic address from config */}
+                <p className="text-gray-600 dark:text-gray-400">{config.address}</p>
               </div>
             </div>
             <div className="flex items-start space-x-4">
@@ -39,7 +43,8 @@ const Contact: React.FC<ContactProps> = ({ language }) => {
               </div>
               <div>
                 <h3 className="font-bold text-xl">{language === 'bn' ? 'ফোন ও মোবাইল' : 'Phone & Mobile'}</h3>
-                <p className="text-gray-600 dark:text-gray-400">{t.mobile}</p>
+                {/* Use dynamic mobile from config */}
+                <p className="text-gray-600 dark:text-gray-400">{config.mobile}</p>
               </div>
             </div>
             <div className="flex items-start space-x-4">
@@ -60,15 +65,15 @@ const Contact: React.FC<ContactProps> = ({ language }) => {
           <form className="space-y-4">
             <div>
               <label className="block text-sm font-bold mb-2">{language === 'bn' ? 'আপনার নাম' : 'Your Name'}</label>
-              <input type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:bg-gray-700 dark:border-gray-600 outline-none focus:ring-2 focus:ring-yellow-500 transition" />
+              <input type="text" className="w-full px-4 py-3 rounded-xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none focus:ring-2 focus:ring-yellow-500 transition" />
             </div>
             <div>
               <label className="block text-sm font-bold mb-2">{language === 'bn' ? 'ইমেইল এড্রেস' : 'Email Address'}</label>
-              <input type="email" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:bg-gray-700 dark:border-gray-600 outline-none focus:ring-2 focus:ring-yellow-500 transition" />
+              <input type="email" className="w-full px-4 py-3 rounded-xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none focus:ring-2 focus:ring-yellow-500 transition" />
             </div>
             <div>
               <label className="block text-sm font-bold mb-2">{language === 'bn' ? 'বার্তালিখুন' : 'Your Message'}</label>
-              <textarea rows={4} className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:bg-gray-700 dark:border-gray-600 outline-none focus:ring-2 focus:ring-yellow-500 transition"></textarea>
+              <textarea rows={4} className="w-full px-4 py-3 rounded-xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none focus:ring-2 focus:ring-yellow-500 transition"></textarea>
             </div>
             <button className="w-full bg-yellow-500 text-black font-bold py-4 rounded-xl flex items-center justify-center space-x-2 hover:bg-yellow-600 transition shadow-lg active:scale-95">
               <Send className="w-5 h-5" />

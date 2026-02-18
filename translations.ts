@@ -45,12 +45,11 @@ export const translations = {
     mobile: "০১৭১৮৯৫২৮৫২",
     calendar: "ক্যালেন্ডার",
     calendar2026: "২০২৬ ক্যালেন্ডার",
+    adminPanel: "অ্যাডমিন প্যানেল",
+    login: "লগইন",
+    insertTable: "টেবিল যোগ করুন",
     months: ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"],
-    weekdays: ["র", "সো", "ম", "বু", "বৃ", "শু", "শ"],
-    eventsForDay: "দিনের ইভেন্ট ও ছুটি",
-    noEvents: "এই দিনে কোনো বিশেষ ইভেন্ট বা সরকারি ছুটি নেই।",
-    holiday: "সরকারি ছুটি",
-    event: "ইভেন্ট"
+    weekdays: ["র", "সো", "ম", "বু", "বৃ", "শু", "শ"]
   },
   en: {
     siteTitle: "Express Bangladesh",
@@ -97,11 +96,10 @@ export const translations = {
     mobile: "01718952852",
     calendar: "Calendar",
     calendar2026: "2026 Calendar",
+    adminPanel: "Admin Panel",
+    login: "Login",
+    insertTable: "Insert Table",
     months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-    weekdays: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
-    eventsForDay: "Events & Holidays",
-    noEvents: "No special events or holidays on this day.",
-    holiday: "Public Holiday",
-    event: "Event"
+    weekdays: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
   }
 };

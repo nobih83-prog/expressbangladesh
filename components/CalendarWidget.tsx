@@ -1,8 +1,8 @@
 
 import React, { useMemo, useState } from 'react';
 import { translations } from '../translations';
-import { ChevronLeft, ChevronRight, Bell, Calendar as CalendarIcon, Info } from 'lucide-react';
-import { HOLIDAYS_EVENTS, HolidayEvent } from '../constants/holidays';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, RotateCcw, Info, Bell } from 'lucide-react';
+import { HOLIDAYS_EVENTS } from '../constants/holidays';
 
 interface CalendarWidgetProps {
   language: 'bn' | 'en';
@@ -28,7 +28,7 @@ const CalendarWidget: React.FC<CalendarWidgetProps> = ({ language }) => {
 
   const years = useMemo(() => {
     const arr = [];
-    for (let i = 1920; i <= 2050; i++) arr.push(i);
+    for (let i = 1971; i <= 2030; i++) arr.push(i);
     return arr;
   }, []);
 
@@ -84,136 +84,125 @@ const CalendarWidget: React.FC<CalendarWidgetProps> = ({ language }) => {
   const currentDayEvents = useMemo(() => getEventsForDay(selectedDay), [selectedDay, viewMonth, viewYear]);
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
-      <h3 className="text-xl font-black mb-6 border-b-2 border-yellow-500 pb-2 dark:text-white flex items-center">
-         <span className="w-2 h-6 bg-yellow-500 mr-3 rounded-full"></span>
-         {t.calendar}
-      </h3>
-      
-      {/* Selectors */}
-      <div className="flex flex-col space-y-3 mb-6">
-        <div className="flex items-center justify-between">
-          <button 
-            onClick={handlePrevMonth}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition text-gray-500"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          
-          <div className="flex space-x-2">
-            <select 
-              value={viewMonth}
-              onChange={(e) => {
-                setViewMonth(parseInt(e.target.value));
-                setSelectedDay(null);
-              }}
-              className="bg-gray-50 dark:bg-gray-700 dark:text-white border-none text-sm font-bold rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-yellow-500"
-            >
-              {t.months.map((m, idx) => (
-                <option key={idx} value={idx}>{m}</option>
-              ))}
-            </select>
-
-            <select 
-              value={viewYear}
-              onChange={(e) => {
-                setViewYear(parseInt(e.target.value));
-                setSelectedDay(null);
-              }}
-              className="bg-gray-50 dark:bg-gray-700 dark:text-white border-none text-sm font-bold rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-yellow-500"
-            >
-              {years.map(y => (
-                <option key={y} value={y}>{formatDigits(y.toString())}</option>
-              ))}
-            </select>
-          </div>
-
-          <button 
-            onClick={handleNextMonth}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition text-gray-500"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Grid */}
-      <div className="grid grid-cols-7 gap-1 text-center">
-        {t.weekdays.map((day, idx) => (
-          <div key={idx} className="text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
-            {day}
-          </div>
-        ))}
-        {calendarData.map((day, idx) => {
-          const events = getEventsForDay(day);
-          const hasEvent = events.length > 0;
-          const isSelected = selectedDay === day;
-
-          return (
-            <div 
-              key={idx} 
-              onClick={() => day && setSelectedDay(day)}
-              className={`relative aspect-square flex flex-col items-center justify-center text-sm font-bold rounded-xl transition-all
-                ${day === null ? '' : 'cursor-pointer'}
-                ${isSelected 
-                  ? 'bg-black text-white dark:bg-yellow-500 dark:text-black shadow-lg scale-110 z-10' 
-                  : isToday(day) 
-                    ? 'bg-yellow-500 text-black shadow-md' 
-                    : day !== null ? 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300' : ''
-                }
-              `}
-            >
-              {day ? formatDigits(day.toString()) : ''}
-              {hasEvent && !isSelected && (
-                <div className="absolute bottom-1.5 w-1 h-1 bg-red-500 rounded-full animate-pulse" />
-              )}
-            </div>
-          );
-        })}
-      </div>
-      
-      {/* Selected Day Events Info */}
-      <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
-        <div className="flex items-center space-x-2 mb-3">
-          <Info className="w-4 h-4 text-yellow-600 dark:text-yellow-500" />
-          <h4 className="text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">
-            {selectedDay ? `${formatDigits(selectedDay.toString())} ${t.months[viewMonth]}, ${t.eventsForDay}` : t.eventsForDay}
-          </h4>
-        </div>
-        
-        <div className="space-y-3">
-          {selectedDay && currentDayEvents.length > 0 ? (
-            currentDayEvents.map((event, idx) => (
-              <div key={idx} className="bg-red-50 dark:bg-red-900/10 p-3 rounded-2xl border border-red-100 dark:border-red-900/20 flex items-start space-x-3">
-                <Bell className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-sm font-bold text-red-700 dark:text-red-400 leading-tight">
-                    {language === 'bn' ? event.bn : event.en}
-                  </p>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-red-400 dark:text-red-600">
-                    {event.isHoliday ? t.holiday : t.event}
-                  </span>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-xs text-gray-400 dark:text-gray-500 italic py-2">
-              {t.noEvents}
-            </p>
-          )}
-        </div>
-
+    <div className="bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
+      <div className="flex items-center justify-between mb-5 border-b-2 border-red-600 pb-2">
+        <h3 className="text-lg font-black dark:text-white flex items-center">
+           <span className="w-1.5 h-5 bg-red-600 mr-2 rounded-full"></span>
+           {t.calendar}
+        </h3>
         <button 
           onClick={() => {
             setViewMonth(today.getMonth());
             setViewYear(today.getFullYear());
             setSelectedDay(today.getDate());
           }}
-          className="w-full mt-4 text-[10px] font-black uppercase tracking-widest text-yellow-600 dark:text-yellow-500 hover:underline flex items-center justify-center space-x-1"
+          className="text-gray-400 hover:text-red-600 transition-colors"
+          title={language === 'bn' ? 'আজকের তারিখ' : 'Today'}
         >
-          <CalendarIcon className="w-3 h-3" />
-          <span>{language === 'bn' ? 'আজকের তারিখে ফিরে যান' : 'Back to Today'}</span>
+          <RotateCcw className="w-4 h-4" />
         </button>
+      </div>
+      
+      <div className="flex items-center justify-between mb-5 bg-gray-50 dark:bg-gray-900/50 p-2 rounded-2xl">
+        <button onClick={handlePrevMonth} className="p-1.5 hover:bg-white dark:hover:bg-gray-700 rounded-xl transition shadow-sm">
+          <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+        </button>
+        
+        <div className="flex space-x-1">
+          <select 
+            value={viewMonth}
+            onChange={(e) => setViewMonth(parseInt(e.target.value))}
+            className="bg-transparent border-none text-[13px] font-bold dark:text-gray-200 outline-none cursor-pointer focus:ring-0"
+          >
+            {t.months.map((m, idx) => (
+              <option key={idx} value={idx} className="dark:text-black">{m}</option>
+            ))}
+          </select>
+          <select 
+            value={viewYear}
+            onChange={(e) => setViewYear(parseInt(e.target.value))}
+            className="bg-transparent border-none text-[13px] font-bold dark:text-gray-200 outline-none cursor-pointer focus:ring-0"
+          >
+            {years.map(y => (
+              <option key={y} value={y} className="dark:text-black">{formatDigits(y.toString())}</option>
+            ))}
+          </select>
+        </div>
+
+        <button onClick={handleNextMonth} className="p-1.5 hover:bg-white dark:hover:bg-gray-700 rounded-xl transition shadow-sm">
+          <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 text-center">
+        {t.weekdays.map((day, idx) => (
+          <div key={idx} className="text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-600 mb-2">
+            {day}
+          </div>
+        ))}
+        {calendarData.map((day, idx) => {
+          const isCurrentToday = isToday(day);
+          const isSelected = selectedDay === day;
+          const events = getEventsForDay(day);
+          const hasEvent = events.length > 0;
+          const isHoliday = events.some(e => e.isHoliday);
+          
+          const eventTitles = events.map(e => language === 'bn' ? e.bn : e.en).join(', ');
+
+          return (
+            <div 
+              key={idx} 
+              onClick={() => day && setSelectedDay(day)}
+              title={eventTitles}
+              className={`aspect-square flex items-center justify-center text-xs font-bold rounded-xl transition-all relative group
+                ${day === null ? '' : 'cursor-pointer'}
+                ${isSelected 
+                  ? 'bg-gray-900 text-white dark:bg-red-600 dark:text-white scale-105 z-10 shadow-md' 
+                  : isCurrentToday 
+                    ? 'text-red-600 dark:text-red-500 border border-red-500/30' 
+                    : isHoliday
+                      ? 'bg-red-50 dark:bg-red-900/20 text-red-600'
+                      : day !== null ? 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300' : ''
+                }
+              `}
+            >
+              {day ? formatDigits(day.toString()) : ''}
+              {hasEvent && !isSelected && (
+                <div className={`absolute bottom-1 w-1 h-1 rounded-full ${isHoliday ? 'bg-red-600' : 'bg-blue-500'}`} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Selected Day Info */}
+      <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700">
+        <div className="flex items-center space-x-2 mb-3">
+          <Info className="w-3.5 h-3.5 text-gray-400" />
+          <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+            {selectedDay ? `${formatDigits(selectedDay.toString())} ${t.months[viewMonth]}` : 'দিনের ইভেন্ট'}
+          </span>
+        </div>
+        
+        <div className="space-y-2">
+          {selectedDay && currentDayEvents.length > 0 ? (
+            currentDayEvents.map((event, idx) => (
+              <div key={idx} className={`${event.isHoliday ? 'bg-red-50 dark:bg-red-900/10 border-red-100 dark:border-red-900/20' : 'bg-blue-50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/20'} p-2.5 rounded-xl border`}>
+                <div className="flex items-start space-x-2">
+                  <Bell className={`w-3.5 h-3.5 mt-0.5 ${event.isHoliday ? 'text-red-600' : 'text-blue-600'}`} />
+                  <p className={`text-xs font-bold ${event.isHoliday ? 'text-red-800 dark:text-red-400' : 'text-blue-800 dark:text-blue-400'}`}>
+                    {language === 'bn' ? event.bn : event.en}
+                    {event.isHoliday && <span className="ml-2 text-[8px] bg-red-600 text-white px-1.5 py-0.5 rounded-full uppercase">{language === 'bn' ? 'ছুটি' : 'Holiday'}</span>}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-[10px] text-gray-400 italic py-1">
+              {language === 'bn' ? 'এই দিনে কোনো সরকারি ছুটি বা ইভেন্ট নেই।' : 'No holidays or events on this day.'}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

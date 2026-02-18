@@ -2,7 +2,8 @@
 import React from 'react';
 import { translations } from '../translations';
 import { Link } from 'react-router-dom';
-import { Calendar as CalendarIcon, ChevronLeft } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, Bell } from 'lucide-react';
+import { HOLIDAYS_EVENTS } from '../constants/holidays';
 
 interface Calendar2026Props {
   language: 'bn' | 'en';
@@ -32,20 +33,29 @@ const Calendar2026: React.FC<Calendar2026Props> = ({ language }) => {
     return days;
   };
 
+  const getHolidayForDate = (day: number | null, month: number) => {
+    if (!day) return null;
+    return HOLIDAYS_EVENTS.find(h => 
+      h.day === day && 
+      h.month === month && 
+      (!h.year || h.year === year)
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl min-h-screen">
       <nav className="text-sm text-gray-500 mb-6 flex items-center space-x-2">
-        <Link to="/" className="hover:text-yellow-600 transition-colors flex items-center">
+        <Link to="/" className="hover:text-red-600 transition-colors flex items-center">
            <ChevronLeft className="w-4 h-4 mr-1" />
            {t.home}
         </Link>
         <span>/</span>
-        <span className="text-yellow-600 font-bold">{t.calendar2026}</span>
+        <span className="text-red-600 font-bold">{t.calendar2026}</span>
       </nav>
 
       <div className="flex items-center justify-center mb-12 space-x-4">
-        <div className="bg-yellow-500 p-3 rounded-2xl shadow-lg">
-          <CalendarIcon className="w-8 h-8 text-black" />
+        <div className="bg-red-600 p-3 rounded-2xl shadow-lg">
+          <CalendarIcon className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white">
           {t.calendar2026}
@@ -57,7 +67,7 @@ const Calendar2026: React.FC<Calendar2026Props> = ({ language }) => {
           const monthDays = getMonthData(monthIdx);
           return (
             <div key={monthIdx} className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 transition-all hover:shadow-xl hover:-translate-y-1">
-              <h3 className="text-xl font-black text-center mb-6 text-yellow-600 dark:text-yellow-500 border-b pb-3 border-gray-100 dark:border-gray-700">
+              <h3 className="text-xl font-black text-center mb-6 text-red-600 dark:text-red-500 border-b pb-3 border-gray-100 dark:border-gray-700">
                 {monthName}
               </h3>
               
@@ -68,33 +78,62 @@ const Calendar2026: React.FC<Calendar2026Props> = ({ language }) => {
                   </div>
                 ))}
                 
-                {monthDays.map((day, idx) => (
-                  <div 
-                    key={idx} 
-                    className={`aspect-square flex items-center justify-center text-sm font-bold rounded-full transition-all
-                      ${day === null ? '' : 'text-gray-700 dark:text-gray-300 hover:bg-yellow-50 dark:hover:bg-gray-700'}
-                    `}
-                  >
-                    {day ? formatDigits(day) : ''}
-                  </div>
-                ))}
+                {monthDays.map((day, idx) => {
+                  const holiday = getHolidayForDate(day, monthIdx);
+                  const isHoliday = holiday?.isHoliday;
+
+                  return (
+                    <div 
+                      key={idx} 
+                      title={holiday ? (language === 'bn' ? holiday.bn : holiday.en) : undefined}
+                      className={`aspect-square flex items-center justify-center text-sm font-bold rounded-full transition-all relative group
+                        ${day === null ? '' : 'text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-gray-700 cursor-default'}
+                        ${isHoliday ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 shadow-sm' : ''}
+                      `}
+                    >
+                      {day ? formatDigits(day) : ''}
+                      {holiday && (
+                        <div className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ${isHoliday ? 'bg-red-600' : 'bg-blue-500'} scale-0 group-hover:scale-100 transition-transform`} />
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           );
         })}
       </div>
 
-      <div className="mt-16 bg-gray-900 text-white rounded-3xl p-8 text-center shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
-        <h2 className="text-2xl font-black mb-4">{language === 'bn' ? '২০২৬ সালের সরকারি ছুটির তালিকা দেখতে চান?' : 'Want to see 2026 public holidays?'}</h2>
-        <p className="text-gray-400 mb-6 max-w-xl mx-auto">
-          {language === 'bn' 
-            ? 'সরকারি ক্যালেন্ডার অনুযায়ী গুরুত্বপূর্ণ দিবস এবং সরকারি ছুটির দিনগুলো নিয়মিত আপডেট করা হয়।' 
-            : 'Important days and public holidays are updated regularly according to the official calendar.'}
-        </p>
-        <Link to="/" className="inline-block bg-yellow-500 text-black px-8 py-3 rounded-full font-black hover:bg-yellow-600 transition shadow-lg active:scale-95">
-          {language === 'bn' ? 'হোম পেজে ফিরে যান' : 'Back to Home'}
-        </Link>
+      <div className="mt-16 bg-gray-900 text-white rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+        
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+          <div className="flex-1">
+            <h2 className="text-2xl font-black mb-4 flex items-center space-x-3">
+              <Bell className="w-8 h-8 text-red-600" />
+              <span>{language === 'bn' ? '২০২৬ সালের সরকারি ছুটির তালিকা' : '2026 Public Holidays List'}</span>
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+              {HOLIDAYS_EVENTS.map((h, i) => (
+                <div key={i} className="flex items-center space-x-3 bg-white/5 p-3 rounded-xl border border-white/10">
+                  <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center font-black text-xs shrink-0">
+                    {formatDigits(h.day)}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-300">{language === 'bn' ? h.bn : h.en}</p>
+                    <p className="text-[10px] text-gray-500 uppercase font-black">{formatDigits(h.day)} {t.months[h.month]}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="shrink-0">
+             <Link to="/" className="inline-block bg-red-600 text-white px-10 py-4 rounded-2xl font-black hover:bg-red-700 transition shadow-xl active:scale-95">
+              {language === 'bn' ? 'হোম পেজে ফিরে যান' : 'Back to Home'}
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );
