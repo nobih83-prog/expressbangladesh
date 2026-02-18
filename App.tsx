@@ -12,6 +12,7 @@ import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Calendar2026 from './pages/Calendar2026';
+import Roza from './pages/Roza';
 import PrayerModal from './components/PrayerModal';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
@@ -59,11 +60,9 @@ const App: React.FC = () => {
       }
 
       try {
-        // Load Config
         const storedConfig = await getConfigFromDB();
         if (storedConfig) setSiteConfig(storedConfig);
 
-        // Load News
         const storedNews = await getNewsFromDB();
         const hasInitialized = localStorage.getItem('express_db_initialized') === 'true';
         
@@ -141,6 +140,7 @@ const App: React.FC = () => {
             <Route path="/privacy" element={<Privacy language={language} />} />
             <Route path="/terms" element={<Terms language={language} />} />
             <Route path="/calendar-2026" element={<Calendar2026 language={language} />} />
+            <Route path="/roza" element={<Roza language={language} />} />
             <Route path="/news/:id" element={<NewsDetail language={language} newsList={newsData} />} />
             <Route path="/category/:id" element={<Home language={language} newsList={newsData} onOpenPrayer={() => setIsPrayerModalOpen(true)} config={siteConfig} />} />
             
